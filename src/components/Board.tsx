@@ -3,7 +3,7 @@ import { useGameStore } from '../store/useGameStore';
 import { Bottle } from './Bottle';
 import { COLOR_THEMES } from '../game/levels';
 import { soundEngine } from '../game/sound';
-import { useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import type { Bottle as BottleData, ColorTheme } from '../game/types';
 import '../styles/responsive.css';
 
@@ -18,6 +18,15 @@ export function Board() {
     const select = useGameStore(s => s.select);
     const [shakeIdx, setShakeIdx] = useState<number | null>(null);
     const [pouringIdx, setPouringIdx] = useState<number | null>(null);
+    const [winW, setWinW] = useState(() => typeof window !== 'undefined' ? window.innerWidth : 1024);
+
+    useEffect(() => {
+        function onResize() { setWinW(window.innerWidth); }
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+    }, []);
+
+    const cols = computeGridCols(state.bottles.length, winW);
 
     function handleClick(i: number) {
         const before = useGameStore.getState().state;
@@ -64,7 +73,7 @@ export function Board() {
     }
 
     return (
-        <div className="board">
+        <div className="board" style={{ '--cols': String(cols) } as CSSProperties}>
             {state.bottles.map((b, i) => (
                 <Bottle
                     key={b.id}
@@ -78,6 +87,26 @@ export function Board() {
             ))}
         </div>
     );
+}
+
+/**
+ * @brief 根据瓶子数与屏幕宽度计算网格列数，让瓶子分行排列且尺寸更大
+ * @desc 桌面：≤5 瓶单行；6 瓶 3×2；7 瓶 4+3 两行。手机：≥3 瓶一律 3 列分行
+ */
+function computeGridCols(n: number, winW: number): number {
+    if (n <= 1) return n;
+    // 手机端：≥3 瓶统一 3 列（4 瓶=2×2，5 瓶=3+2，6 瓶=3×2，7 瓶=3+3+1）
+    if (winW <= 480) return Math.min(n, 3);
+    // 平板：6 瓶 3 列；7 瓶 4 列；其他按实际瓶数单行
+    if (winW <= 768) {
+        if (n === 6) return 3;
+        if (n === 7) return 4;
+        return n;
+    }
+    // 桌面：≤5 瓶单行；6 瓶 3×2；7 瓶 4+3
+    if (n <= 5) return n;
+    if (n === 6) return 3;
+    return 4;
 }
 
 /**

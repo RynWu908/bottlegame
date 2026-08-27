@@ -10,6 +10,7 @@ export function makeDefaultSave(): SaveData {
     version: SCHEMA_VERSION,
     progress: { unlockedLevelId: 1, lastPlayedId: 1 },
     records: {},
+    victoryHistory: [],
     settings: { soundEnabled: true, reducedMotion: false },
   };
 }
@@ -59,6 +60,7 @@ export function migrateSave(raw: unknown): SaveData | null {
       lastPlayedId: progressRaw?.unlockedLevelId ?? 1,
     },
     records: (obj['records'] as SaveData['records']) ?? {},
+    victoryHistory: Array.isArray(obj['victoryHistory']) ? obj['victoryHistory'] as SaveData['victoryHistory'] : [],
     settings: (obj['settings'] as SaveData['settings']) ?? base.settings,
   } as SaveData;
 }

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Menu } from './components/Menu';
 import { LevelSelect } from './components/LevelSelect';
+import { VictoryList } from './components/VictoryList';
 import { Board } from './components/Board';
 import { HUD } from './components/HUD';
 import { VictoryOverlay } from './components/VictoryOverlay';
@@ -11,9 +12,9 @@ import { computeStars } from './game/stars';
 import { soundEngine } from './game/sound';
 import './styles/globals.css';
 
-type Route = 'menu' | 'select' | 'game';
+type Route = 'menu' | 'select' | 'game' | 'records';
 
-/** @brief 应用根组件：菜单 ↔ 选关 ↔ 游戏 ↔ 通关 路由 */
+/** @brief 应用根组件：菜单 ↔ 选关 ↔ 游戏 ↔ 通关 ↔ 战绩 路由 */
 export default function App() {
     const [route, setRoute] = useState<Route>('menu');
     const state = useGameStore(s => s.state);
@@ -37,6 +38,7 @@ export default function App() {
     if (route === 'menu') {
         return <Menu
             onPlay={() => setRoute('select')}
+            onRecords={() => setRoute('records')}
             {...(unlockedId > 50 ? { onRandom: () => { startRandom(5); setRoute('game'); } } : {})}
         />;
     }
@@ -47,19 +49,22 @@ export default function App() {
             onBack={() => setRoute('menu')}
         />;
     }
+    if (route === 'records') {
+        return <VictoryList onBack={() => setRoute('menu')} />;
+    }
     return (
         <div className="game-route" style={{ minHeight: '100vh' }}>
-            <HUD onMenu={() => setRoute('menu')} />
+            <HUD onMenu={() => { if (state.status === 'won') save(); setRoute('menu'); }} />
             <Board />
             <VictoryOverlay
                 visible={state.status === 'won'}
                 stars={state.status === 'won' ? stars : 0}
-                onRetry={() => useGameStore.getState().reset()}
+                onRetry={() => { save(); useGameStore.getState().reset(); }}
                 onNext={() => {
+                    save(); // 先记录本次胜利战绩
                     if (currentLevel && currentLevel.id > 0 && currentLevel.id < 50) {
                         startLevel(currentLevel.id + 1);
                     } else {
-                        save();
                         setRoute('menu');
                     }
                 }}

@@ -52,6 +52,7 @@ export const Bottle = memo(function Bottle({ bottle, selected, shake, pouring, o
       {pouring && topColor && (
         <div className="bottle__droplet" style={{ background: topColor }} />
       )}
+      {completed && <div className="bottle__sparkle" />}
     </div>
   );
 });

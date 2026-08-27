@@ -69,6 +69,15 @@ export interface LevelRecord {
     stars: 0 | 1 | 2 | 3;
 }
 
+/** @brief 单次通关记录（用于战绩列表展示） */
+export interface VictoryEntry {
+    levelId: number;
+    moves: number;
+    timeMs: number;
+    stars: 0 | 1 | 2 | 3;
+    date: string;
+}
+
 export interface SaveData {
     version: number;
     progress: {
@@ -76,6 +85,7 @@ export interface SaveData {
         lastPlayedId: number;
     };
     records: Record<number, LevelRecord>;
+    victoryHistory: VictoryEntry[];
     settings: {
         soundEnabled: boolean;
         reducedMotion: boolean;
