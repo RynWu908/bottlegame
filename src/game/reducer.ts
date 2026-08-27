@@ -1,5 +1,6 @@
 // src/game/reducer.ts
 import type { GameState, Level, Bottle, Snapshot } from './types';
+import { ASSIST_LIMITS } from './types';
 
 export type GameAction =
   | { type: 'select'; index: number }
@@ -19,6 +20,9 @@ export function createInitialState(level: Level): GameState {
     undosUsed: 0,
     status: 'playing',
     elapsedMs: 0,
+    levelId: level.id,
+    par: level.par,
+    difficulty: level.difficulty,
   };
 }
 
@@ -28,7 +32,9 @@ export function reducer(state: GameState, action: GameAction): GameState {
     case 'select':
       return applySelect(state, action.index);
     case 'reset':
-      return createInitialState(stateToLevel(state));
+      // store 层负责从 levels 找原 level 重新 init；reducer 自己无法重建
+      // 故 reset 在 reducer 内是 no-op，由 store 层调用 createInitialState 重新创建
+      return state;
     case 'tick':
       return { ...state, elapsedMs: state.elapsedMs + action.deltaMs };
     case 'addEmptyBottle':
@@ -98,27 +104,53 @@ function pour(state: GameState, from: number, to: number): GameState {
     dst.layers.push(src.layers.pop()!);
     amount++;
   }
-  return {
+  const newState: GameState = {
     ...state,
     bottles: newBottles,
     selected: null,
     moves: state.moves + 1,
     history: [...state.history, snapshot],
   };
+  return checkVictory(newState);
+}
+
+/** @brief 判定胜利：所有非空瓶子都是单一颜色且满 */
+export function checkVictory(state: GameState): GameState {
+  if (state.status === 'won') return state;
+  const won = state.bottles.every(b => {
+    if (b.layers.length === 0) return true;
+    if (b.layers.length !== b.capacity) return false;
+    const first = b.layers[0];
+    if (first === undefined) return false;
+    return b.layers.every(c => c === first);
+  });
+  return won ? { ...state, status: 'won', selected: null } : state;
 }
 
 // 临时实现，Task 3 完善
-function stateToLevel(state: GameState): Level {
+function applyAddEmptyBottle(state: GameState): GameState {
+  if (state.emptyBottlesAdded >= ASSIST_LIMITS.addEmptyBottle) return state;
+  const newId = state.bottles.length > 0
+    ? Math.max(...state.bottles.map(b => b.id)) + 1
+    : 0;
+  const empty: Bottle = { id: newId, capacity: 4, layers: [] };
   return {
-    id: 0,
-    bottles: state.bottles,
-    par: 0,
-    difficulty: 1,
+    ...state,
+    bottles: [...state.bottles, empty],
+    emptyBottlesAdded: state.emptyBottlesAdded + 1,
   };
 }
-function applyAddEmptyBottle(state: GameState): GameState {
-  return state;
-}
 function applyUndo(state: GameState): GameState {
-  return state;
+  if (state.undosUsed >= ASSIST_LIMITS.undo) return state;
+  if (state.history.length === 0) return state;
+  const last = state.history[state.history.length - 1]!;
+  return {
+    ...state,
+    bottles: last.bottles.map(b => ({ ...b, layers: [...b.layers] })),
+    moves: last.moves,
+    selected: null,
+    history: state.history.slice(0, -1),
+    undosUsed: state.undosUsed + 1,
+    status: 'playing',
+  };
 }

@@ -30,6 +30,9 @@ export interface GameState {
     undosUsed: number;
     status: 'playing' | 'won';
     elapsedMs: number;
+    levelId: number;
+    par: number;
+    difficulty: Difficulty;
 }
 
 export interface Snapshot {
