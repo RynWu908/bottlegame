@@ -16,3 +16,20 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 @media (max-width: 640px) {
   :root { --bottle-w: min(8vmin, 64px); }
 }
+
+/* VictoryOverlay 庆祝层 */
+.victory {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.5);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 10;
+}
+.victory__card {
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+}
+.victory__stars { font-size: 48px; margin: 16px 0; }
