@@ -33,3 +33,29 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   text-align: center;
 }
 .victory__stars { font-size: 48px; margin: 16px 0; }
+
+/* MathQuizModal 口算题弹窗 */
+.quiz-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.4);
+  display: flex; align-items: center; justify-content: center; z-index: 20;
+  backdrop-filter: blur(8px);
+}
+.quiz {
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 16px; padding: 24px; text-align: center;
+  min-width: 280px;
+}
+.quiz__question { font-size: clamp(28px, 5vmin, 40px); margin: 16px 0; }
+.quiz__input { font-size: 24px; padding: 8px; width: 120px; text-align: center; }
+.quiz__input.shake { animation: shake .2s; border-color: #ff6b6b; }
+.quiz__keypad {
+  display: grid; grid-template-columns: repeat(3, 56px); gap: 8px;
+  margin: 16px auto; justify-content: center;
+}
+.quiz__keypad button { font-size: 20px; padding: 12px; background: rgba(255,255,255,.1); border-radius: 8px; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
