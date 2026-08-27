@@ -1,17 +1,60 @@
-/* src/styles/responsive.css */
+/* src/styles/responsive.css — 棋盘网格与响应式布局 */
 .board {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(var(--bottle-w), 1fr));
-  gap: 12px;
+  gap: 14px;
   max-width: 720px;
   margin: 0 auto;
-  padding: 16px;
+  padding: 20px 16px 40px;
   justify-items: center;
 }
-@media (max-width: 640px) {
+
+.board .bottle {
+  width: 100%;
+  max-width: var(--bottle-w);
+}
+
+/* 平板 */
+@media (max-width: 768px) {
+  :root {
+    --bottle-w: min(10vmin, 80px);
+  }
+  .board {
+    gap: 10px;
+    padding: 16px 12px 32px;
+  }
+}
+
+/* 手机 */
+@media (max-width: 480px) {
+  :root {
+    --bottle-w: min(16vmin, 64px);
+  }
   .board {
     grid-template-columns: repeat(auto-fit, minmax(var(--bottle-w), 1fr));
     gap: 8px;
-    padding: 8px;
+    padding: 12px 8px 28px;
+  }
+}
+
+/* 小屏手机 */
+@media (max-width: 360px) {
+  :root {
+    --bottle-w: min(18vmin, 56px);
+  }
+  .board {
+    gap: 6px;
+    padding: 10px 6px 24px;
+  }
+}
+
+/* 横屏适配 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .board {
+    grid-template-columns: repeat(auto-fit, minmax(calc(var(--bottle-w) * 0.8), 1fr));
+    max-width: 900px;
+  }
+  :root {
+    --bottle-h: calc(var(--bottle-w) * 1.8);
   }
 }

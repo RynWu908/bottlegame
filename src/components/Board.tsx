@@ -2,13 +2,14 @@
 import { useGameStore } from '../store/useGameStore';
 import { Bottle } from './Bottle';
 import { COLOR_THEMES } from '../game/levels';
+import { soundEngine } from '../game/sound';
 import { useState } from 'react';
 import type { Bottle as BottleData, ColorTheme } from '../game/types';
 import '../styles/responsive.css';
 
 /**
  * @brief 棋盘组件：从 useGameStore 读 state，把每个 bottle 映射为 Bottle 组件并渲染网格
- * @desc 同时承担颜色 ID 到 CSS 色值的解析、非法操作的"抖动"反馈
+ * @desc 承担颜色 ID → CSS 色值解析、非法操作抖动、成功倒水珠动画与音效
  */
 export function Board() {
     const state = useGameStore(s => s.state);
@@ -16,21 +17,47 @@ export function Board() {
     const theme = COLOR_THEMES[difficulty] ?? COLOR_THEMES[1]!;
     const select = useGameStore(s => s.select);
     const [shakeIdx, setShakeIdx] = useState<number | null>(null);
+    const [pouringIdx, setPouringIdx] = useState<number | null>(null);
 
     function handleClick(i: number) {
-        const before = useGameStore.getState().state.selected;
-        const beforeBottles = useGameStore.getState().state.bottles.map(b => b.layers.length);
+        const before = useGameStore.getState().state;
+        const beforeSelected = before.selected;
+        const beforeBottles = before.bottles.map(b => b.layers.length);
+
+        // 用户手势内解锁 AudioContext
+        soundEngine.resume();
+
         select(i);
-        // 检测是否非法：moves 不变且 selected 保留 → 抖动
+
+        // 延迟到状态更新后判断操作结果
         setTimeout(() => {
             const after = useGameStore.getState().state;
-            if (after.moves === 0 && after.selected === before && before !== null) {
-                // 可能是非法；进一步比较 bottles
+
+            if (beforeSelected === null) {
+                // 选中瓶子
+                if (after.selected === i) {
+                    soundEngine.play('select');
+                }
+                // 点空瓶：无变化，静默
+            } else if (beforeSelected === i) {
+                // 同瓶取消选中
+                if (after.selected === null) {
+                    soundEngine.play('click');
+                }
+            } else {
+                // 尝试从 beforeSelected → i 倒水
                 const afterBottles = after.bottles.map(b => b.layers.length);
-                const same = beforeBottles.every((v, idx) => v === afterBottles[idx]);
-                if (same) {
+                const changed = !beforeBottles.every((v, idx) => v === afterBottles[idx]);
+                if (changed) {
+                    // 成功倒水：播放倒水音 + 源瓶水珠动画
+                    soundEngine.play('pour');
+                    setPouringIdx(beforeSelected);
+                    setTimeout(() => setPouringIdx(null), 500);
+                } else {
+                    // 非法操作：抖动 + 错误音
+                    soundEngine.play('wrong');
                     setShakeIdx(i);
-                    setTimeout(() => setShakeIdx(null), 200);
+                    setTimeout(() => setShakeIdx(null), 300);
                 }
             }
         }, 0);
@@ -44,6 +71,7 @@ export function Board() {
                     bottle={resolveColors(b, theme)}
                     selected={state.selected === i}
                     shake={shakeIdx === i}
+                    pouring={pouringIdx === i}
                     difficulty={difficulty}
                     onClick={() => handleClick(i)}
                 />
@@ -54,7 +82,6 @@ export function Board() {
 
 /**
  * @brief 把 bottle.layers 中的 ColorId 替换为 theme 中对应的 CSS 色值
- * @desc Bottle 组件的 fill 直接收 CSS 颜色串；找不到映射时保留原值兜底
  */
 function resolveColors(b: BottleData, theme: ColorTheme): BottleData {
     return { ...b, layers: b.layers.map(c => theme[c] ?? c) };

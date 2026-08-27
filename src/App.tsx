@@ -8,6 +8,7 @@ import { VictoryOverlay } from './components/VictoryOverlay';
 import { MathQuizModal } from './components/MathQuizModal';
 import { useGameStore } from './store/useGameStore';
 import { computeStars } from './game/stars';
+import { soundEngine } from './game/sound';
 import './styles/globals.css';
 
 type Route = 'menu' | 'select' | 'game';
@@ -21,9 +22,15 @@ export default function App() {
     const startLevel = useGameStore(s => s.startLevel);
     const startRandom = useGameStore(s => s.startRandom);
     const save = useGameStore(s => s.save);
-    const unlockedId = useGameStore(s => s.saveData.progress.unlockedLevelId);
+    const saveData = useGameStore(s => s.saveData);
+    const unlockedId = saveData.progress.unlockedLevelId;
 
     useEffect(() => { loadProgress(); }, [loadProgress]);
+
+    // 同步音效开关到引擎
+    useEffect(() => {
+        soundEngine.enabled = saveData.settings.soundEnabled;
+    }, [saveData.settings.soundEnabled]);
 
     const stars = computeStars(state.moves, currentLevel?.par ?? 1);
 
@@ -41,7 +48,7 @@ export default function App() {
         />;
     }
     return (
-        <>
+        <div className="game-route" style={{ minHeight: '100vh' }}>
             <HUD onMenu={() => setRoute('menu')} />
             <Board />
             <VictoryOverlay
@@ -58,6 +65,6 @@ export default function App() {
                 }}
             />
             <MathQuizModal />
-        </>
+        </div>
     );
 }

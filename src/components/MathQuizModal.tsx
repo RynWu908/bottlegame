@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useGameStore } from '../store/useGameStore';
 import { generateQuestion } from '../game/mathquiz';
+import { soundEngine } from '../game/sound';
 import { useKeyboard } from '../hooks/useKeyboard';
 
 /**
@@ -20,12 +21,23 @@ export function MathQuizModal() {
     const [input, setInput] = useState('');
     const [wrongCount, setWrongCount] = useState(0);
     const [shake, setShake] = useState(false);
+    const [glow, setGlow] = useState(false);
 
     function submit() {
         if (parseInt(input, 10) === question.answer) {
+            soundEngine.play('correct');
+            const assist = pending;
+            setGlow(true);
             onPassed();
             reset();
+            // 答对后延迟播放辅助音效，避免与 correct 音重叠
+            if (assist === 'undo') {
+                setTimeout(() => soundEngine.play('undo'), 200);
+            } else if (assist === 'addEmptyBottle') {
+                setTimeout(() => soundEngine.play('addBottle'), 200);
+            }
         } else {
+            soundEngine.play('wrong');
             const next = wrongCount + 1;
             setWrongCount(next);
             setShake(true);
@@ -42,6 +54,23 @@ export function MathQuizModal() {
         setQuestion(generateQuestion(state.difficulty));
         setInput('');
         setWrongCount(0);
+        setGlow(false);
+    }
+
+    function handleClose() {
+        soundEngine.play('click');
+        close();
+        reset();
+    }
+
+    function handleKeypad(digit: string) {
+        soundEngine.playKeypad(parseInt(digit, 10));
+        setInput(s => s + digit);
+    }
+
+    function handleBackspace() {
+        soundEngine.play('click');
+        setInput(s => s.slice(0, -1));
     }
 
     // 必须在 early return 之前调用，保证 hooks 调用数恒定
@@ -55,13 +84,17 @@ export function MathQuizModal() {
 
     const title = pending === 'undo' ? '撤销 · 答对即可回退一步' : '加空瓶 · 答对即可获得空瓶';
 
+    const inputCls = ['quiz__input'];
+    if (shake) inputCls.push('shake');
+    if (glow) inputCls.push('glow');
+
     return (
         <div className="quiz-overlay" role="dialog" aria-label="口算题">
             <div className="quiz">
                 <h3>{title}</h3>
                 <div className="quiz__question">{question.display}</div>
                 <input
-                    className={['quiz__input', shake ? 'shake' : ''].filter(Boolean).join(' ')}
+                    className={inputCls.join(' ')}
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     inputMode="numeric"
@@ -69,12 +102,12 @@ export function MathQuizModal() {
                 />
                 <div className="quiz__keypad">
                     {['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'].map(n => (
-                        <button key={n} onClick={() => setInput(s => s + n)} aria-label={`数字 ${n}`}>{n}</button>
+                        <button key={n} onClick={() => handleKeypad(n)} aria-label={`数字 ${n}`}>{n}</button>
                     ))}
-                    <button onClick={() => setInput(s => s.slice(0, -1))} aria-label="退格">⌫</button>
-                    <button data-test="submit" onClick={submit} aria-label="确定">确定</button>
+                    <button onClick={handleBackspace} aria-label="退格">⌫</button>
+                    <button className="jelly-btn" data-test="submit" onClick={submit} aria-label="确定">确定</button>
                 </div>
-                <button onClick={() => { close(); reset(); }} aria-label="关闭">关闭</button>
+                <button className="jelly-btn quiz__close" onClick={handleClose} aria-label="关闭">关闭</button>
             </div>
         </div>
     );

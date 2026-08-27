@@ -7,11 +7,11 @@ import type { Bottle as BottleData } from '../../src/game/types';
 const bottle: BottleData = { id: 0, capacity: 4, layers: ['c1', 'c1', 'c2', 'c2'] };
 
 describe('Bottle component', () => {
-  it('渲染瓶子容器与液体 SVG', () => {
+  it('渲染瓶子容器与液体段', () => {
     const { container } = render(<Bottle bottle={bottle} selected={false} difficulty={1} onClick={() => {}} />);
     expect(container.querySelector('.bottle')).toBeTruthy();
     expect(container.querySelector('.bottle__liquid')).toBeTruthy();
-    expect(container.querySelectorAll('svg path').length).toBeGreaterThan(0);
+    expect(container.querySelectorAll('.bottle__liquid-seg').length).toBeGreaterThan(0);
   });
 
   it('selected 时有 .selected 类', () => {

@@ -1,61 +1,518 @@
-/* src/styles/globals.css */
+/* src/styles/globals.css — Soft Pastel Luxury 童趣轻奢 */
+
+/* =========================================================
+   Google Fonts: Fredoka (display, rounded playful) + Fraunces (display serif)
+   ========================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,900&display=swap');
+
 *, *::before, *::after { box-sizing: border-box; }
-html, body, #root { height: 100%; margin: 0; }
-body {
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  font-family: 'Fredoka', system-ui, sans-serif;
   color: #fff;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  overflow-x: hidden;
 }
-button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+
+/* =========================================================
+   背景：三层叠加 — 柔和渐变 + 噪点 + 晕染光圈
+   ========================================================= */
+body {
+  background:
+    /* 顶部左：粉光晕 */
+    radial-gradient(ellipse 60% 50% at 12% 8%, rgba(255,182,193,.65), transparent 70%),
+    /* 底部右：青蓝光晕 */
+    radial-gradient(ellipse 70% 55% at 88% 92%, rgba(135,206,250,.55), transparent 70%),
+    /* 中央：淡黄奶油 */
+    radial-gradient(circle 55% at 50% 50%, rgba(255,248,220,.35), transparent 75%),
+    /* 基底渐变 */
+    linear-gradient(160deg, #fce4ec 0%, #e1bee7 35%, #c5cae9 65%, #b2ebf2 100%);
+  background-attachment: fixed;
+  position: relative;
+}
+
+/* 噪点纹理（SVG dataURI，无外部资源） */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.7'/></svg>");
+  opacity: 0.45;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 晕角 */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(68,50,102,.18) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================================================
+   通用字体
+   ========================================================= */
+h1, h2, h3, .display {
+  font-family: 'Fraunces', 'Fredoka', serif;
+  letter-spacing: -0.01em;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* =========================================================
+   基础按钮：果冻触感 (jelly)
+   ========================================================= */
+.jelly-btn {
+  position: relative;
+  padding: 10px 18px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -4px 10px rgba(0, 0, 0, 0.08),
+    0 3px 10px rgba(68, 50, 102, 0.15);
+  transition: transform 0.16s cubic-bezier(.34,1.56,.64,1),
+              box-shadow 0.2s ease,
+              background 0.2s ease;
+  color: #4a2f78;
+  font-weight: 600;
+}
+.jelly-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -4px 10px rgba(0, 0, 0, 0.08),
+    0 5px 16px rgba(68, 50, 102, 0.2);
+}
+.jelly-btn:active {
+  transform: scale(0.96) skewX(-2deg);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.06),
+    0 1px 4px rgba(68, 50, 102, 0.15);
+}
+.jelly-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(30%);
+  transform: none;
+}
+
+/* =========================================================
+   变量
+   ========================================================= */
 :root {
   --bottle-w: min(8vmin, 96px);
   --bottle-h: calc(var(--bottle-w) * 2.2);
+  --text-dark: #4a2f78;
+  --text-mid: #7d5fa8;
+  --accent-pink: #ff8fb1;
+  --accent-cyan: #7fd4ef;
+  --accent-yellow: #ffd780;
+  --ease-jelly: cubic-bezier(.34,1.56,.64,1);
+  --ease-flow: cubic-bezier(.4,0,.2,1);
 }
+
 @media (max-width: 640px) {
   :root { --bottle-w: min(8vmin, 64px); }
 }
 
-/* VictoryOverlay 庆祝层 */
+/* =========================================================
+   页面通用容器（菜单 / 选择页）
+   ========================================================= */
+.page {
+  min-height: 100%;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  animation: pageIn .55s var(--ease-jelly) both;
+}
+.page h1 {
+  font-size: clamp(36px, 7vmin, 68px);
+  background: linear-gradient(135deg, #8e44ad 0%, #e74c93 60%, #f39c12 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 6px rgba(255, 255, 255, 0.35));
+  text-align: center;
+  margin: 0;
+  animation: titleFloat 4s ease-in-out infinite alternate;
+}
+@keyframes titleFloat {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-6px); }
+}
+
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================================
+   菜单
+   ========================================================= */
+.menu {
+  gap: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 360px;
+}
+.menu .jelly-btn {
+  width: 100%;
+  padding: 16px 24px;
+  font-size: 20px;
+  font-weight: 700;
+  font-family: 'Fredoka', sans-serif;
+  opacity: 0;
+  animation: btnIn .55s var(--ease-jelly) both;
+}
+.menu .jelly-btn:nth-child(1) { animation-delay: .12s; }
+.menu .jelly-btn:nth-child(2) { animation-delay: .24s; }
+
+@keyframes btnIn {
+  from { opacity: 0; transform: scale(0.8) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* =========================================================
+   关卡选择
+   ========================================================= */
+.level-select {
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.level-select__grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+@media (max-width: 420px) {
+  .level-select__grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+}
+.level-select__grid button {
+  aspect-ratio: 1 / 1;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-dark);
+  opacity: 0;
+  transform: scale(0.7);
+  animation: tileIn .45s var(--ease-jelly) both;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 4px 10px rgba(68, 50, 102, 0.12);
+  transition: transform 0.15s var(--ease-jelly), box-shadow 0.2s ease;
+}
+.level-select__grid button:nth-child(n) { animation-delay: calc(0.03s * (var(--i, 0))); }
+.level-select__grid button:hover {
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 8px 18px rgba(68, 50, 102, 0.2);
+}
+.level-select__grid button:active {
+  transform: scale(0.9);
+}
+.level-select__grid button:disabled {
+  opacity: 0.4;
+  filter: grayscale(60%);
+  cursor: not-allowed;
+  transform: none;
+  animation: none;
+  opacity: 0.35;
+}
+@keyframes tileIn {
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* =========================================================
+   游戏页 HUD
+   ========================================================= */
+.hud {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--text-dark);
+  font-weight: 600;
+  font-size: 14px;
+  animation: hudIn .45s var(--ease-jelly) both;
+  animation-delay: .05s;
+}
+.hud .jelly-btn { padding: 6px 12px; font-size: 13px; border-radius: 12px; }
+.hud > span {
+  background: rgba(255,255,255,0.25);
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+@keyframes hudIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================================
+   VictoryOverlay 庆祝层
+   ========================================================= */
 .victory {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,.5);
-  backdrop-filter: blur(8px);
+  background: rgba(68, 50, 102, 0.55);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
   display: flex; align-items: center; justify-content: center;
   z-index: 10;
+  animation: vFadeIn .4s ease both;
+}
+@keyframes vFadeIn {
+  from { opacity: 0; } to { opacity: 1; }
 }
 .victory__card {
-  background: rgba(255,255,255,.15);
-  border: 1px solid rgba(255,255,255,.3);
-  border-radius: 16px;
-  padding: 32px;
+  background: linear-gradient(145deg, rgba(255,255,255,.35), rgba(255,255,255,.18));
+  border: 1px solid rgba(255,255,255,.45);
+  border-radius: 28px;
+  padding: 40px 36px;
   text-align: center;
+  position: relative;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.6),
+    0 20px 60px rgba(68, 50, 102, 0.35);
+  transform: scale(0.6);
+  animation: cardIn .55s var(--ease-jelly) .1s both;
 }
-.victory__stars { font-size: 48px; margin: 16px 0; }
+@keyframes cardIn {
+  to { transform: scale(1); }
+}
+.victory__card h2 {
+  margin: 0 0 6px;
+  font-size: clamp(32px, 6vmin, 48px);
+  background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.victory__stars {
+  font-size: 56px;
+  margin: 18px 0 28px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.victory__stars span {
+  filter: drop-shadow(0 3px 6px rgba(243,156,18,.4));
+  animation: starIn .5s var(--ease-jelly) both;
+}
+.victory__stars span:nth-child(1) { animation-delay: .35s; }
+.victory__stars span:nth-child(2) { animation-delay: .5s; }
+.victory__stars span:nth-child(3) { animation-delay: .65s; }
+@keyframes starIn {
+  from { opacity: 0; transform: scale(0.3) rotate(-30deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0); }
+}
 
-/* MathQuizModal 口算题弹窗 */
+/* 纸屑层 */
+.confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.confetti__piece {
+  position: absolute;
+  top: -10%;
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
+  will-change: transform, opacity;
+  animation: confettiFall linear forwards;
+}
+@keyframes confettiFall {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate3d(var(--dx, 0px), 110vh, 0) rotate(var(--rot, 720deg)); opacity: 0.2; }
+}
+
+/* 胜利卡片按钮组 */
+.victory__card .btn-group {
+  display: flex; gap: 10px; margin-top: 10px; justify-content: center;
+}
+.victory__card .jelly-btn {
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+.victory__card .jelly-btn--primary {
+  background: linear-gradient(135deg, #ff8fb1, #f39c12);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
+}
+
+/* =========================================================
+   MathQuizModal 口算题
+   ========================================================= */
 .quiz-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,.4);
+  position: fixed; inset: 0;
+  background: rgba(68, 50, 102, 0.45);
   display: flex; align-items: center; justify-content: center; z-index: 20;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  animation: vFadeIn .25s ease both;
 }
 .quiz {
-  background: rgba(255,255,255,.15);
-  border: 1px solid rgba(255,255,255,.3);
-  border-radius: 16px; padding: 24px; text-align: center;
+  background: linear-gradient(145deg, rgba(255,255,255,.45), rgba(255,255,255,.22));
+  border: 1px solid rgba(255,255,255,.5);
+  border-radius: 24px; padding: 28px 24px; text-align: center;
   min-width: 280px;
+  color: var(--text-dark);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.6),
+    0 18px 50px rgba(68, 50, 102, 0.3);
+  animation: cardIn .45s var(--ease-jelly) .05s both;
 }
-.quiz__question { font-size: clamp(28px, 5vmin, 40px); margin: 16px 0; }
-.quiz__input { font-size: 24px; padding: 8px; width: 120px; text-align: center; }
-.quiz__input.shake { animation: shake .2s; border-color: #ff6b6b; }
-.quiz__keypad {
-  display: grid; grid-template-columns: repeat(3, 56px); gap: 8px;
-  margin: 16px auto; justify-content: center;
+.quiz h3 {
+  margin: 0 0 14px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-mid);
+  font-family: 'Fredoka', sans-serif;
 }
-.quiz__keypad button { font-size: 20px; padding: 12px; background: rgba(255,255,255,.1); border-radius: 8px; }
-@keyframes shake {
+.quiz__question {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: clamp(30px, 5.5vmin, 44px);
+  margin: 6px 0 18px;
+  color: var(--text-dark);
+  text-shadow: 0 1px 0 rgba(255,255,255,.5);
+}
+.quiz__input {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 26px;
+  padding: 8px 0;
+  width: 140px;
+  text-align: center;
+  border-radius: 12px;
+  border: 2px solid rgba(157, 114, 214, 0.4);
+  background: rgba(255,255,255,0.6);
+  color: var(--text-dark);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+.quiz__input:focus {
+  outline: none;
+  border-color: #e74c93;
+  box-shadow: 0 0 0 4px rgba(231,76,147,.18);
+}
+.quiz__input.shake {
+  animation: shakeIn .25s ease;
+  border-color: #e74c3c;
+  background: rgba(255, 209, 209, 0.6);
+}
+@keyframes shakeIn {
   0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-6px); }
-  75% { transform: translateX(6px); }
+  20% { transform: translateX(-8px) rotate(-1deg); }
+  40% { transform: translateX(8px) rotate(1deg); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+}
+.quiz__input.glow {
+  animation: inputGlow .6s var(--ease-jelly);
+}
+@keyframes inputGlow {
+  0%   { box-shadow: 0 0 0 0 rgba(46,204,113,0); }
+  40%  { box-shadow: 0 0 0 12px rgba(46,204,113,.3); transform: scale(1.06); }
+  100% { box-shadow: 0 0 0 2px rgba(46,204,113,.1); transform: scale(1); }
+}
+.quiz__keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 58px);
+  gap: 8px;
+  margin: 18px auto;
+  justify-content: center;
+}
+.quiz__keypad button {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  padding: 12px 0;
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(255,255,255,.6), rgba(255,255,255,.3));
+  color: var(--text-dark);
+  border: 1px solid rgba(255,255,255,.45);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.7),
+    0 3px 8px rgba(68, 50, 102, 0.15);
+  transition: transform 0.12s var(--ease-jelly), box-shadow 0.15s;
+}
+.quiz__keypad button:hover {
+  background: linear-gradient(145deg, rgba(255,255,255,.75), rgba(255,255,255,.4));
+  transform: translateY(-1px);
+}
+.quiz__keypad button:active {
+  transform: scale(0.92);
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,.1),
+    0 1px 2px rgba(68, 50, 102, 0.1);
+}
+.quiz__footer {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 12px;
+}
+.quiz__footer .jelly-btn {
+  padding: 8px 14px;
+  font-size: 13px;
+}
+.quiz__close {
+  margin-top: 14px;
+  padding: 8px 20px;
+  font-size: 14px;
+}
+
+/* =========================================================
+   游戏路由容器
+   ========================================================= */
+.game-route {
+  animation: pageIn 0.4s var(--ease-flow) both;
 }

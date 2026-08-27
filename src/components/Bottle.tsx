@@ -8,45 +8,61 @@ interface Props {
   selected: boolean;
   difficulty: Difficulty;
   shake?: boolean;
+  pouring?: boolean;
   onClick: () => void;
 }
 
-export const Bottle = memo(function Bottle({ bottle, selected, shake, onClick }: Props) {
+export const Bottle = memo(function Bottle({ bottle, selected, shake, pouring, onClick }: Props) {
   const segments = mergeSegments(bottle.layers);
   const capacity = bottle.capacity;
+  const completed = isCompleted(bottle);
+  const topColor = bottle.layers.length > 0 ? bottle.layers[bottle.layers.length - 1] : null;
+
+  const cls = ['bottle'];
+  if (selected) cls.push('selected');
+  if (shake) cls.push('shake');
+  if (completed) cls.push('completed');
+
   return (
     <div
-      className={['bottle', selected ? 'selected' : '', shake ? 'shake' : ''].filter(Boolean).join(' ')}
+      className={cls.join(' ')}
       onClick={onClick}
       role="button"
       aria-pressed={selected}
       aria-label={`瓶子 ${bottle.id + 1}`}
     >
-      <svg className="bottle__liquid" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <div className="bottle__liquid">
         {segments.map((seg, i) => {
-          const top = computeTopY(seg.cumulativeEnd, capacity);
-          const bottom = computeTopY(seg.cumulativeStart, capacity);
-          const color = seg.color;
+          const bottomPct = (seg.cumulativeStart / capacity) * 100;
+          const heightPct = ((seg.cumulativeEnd - seg.cumulativeStart) / capacity) * 100;
+          const isTop = i === segments.length - 1;
           return (
-            <path
+            <div
               key={i}
-              d={`M0,${top} L0,${bottom} L100,${bottom} L100,${top} Q50,${top - 2} 0,${top} Z`}
-              fill={color}
+              className={`bottle__liquid-seg${isTop ? ' bottle__liquid-seg--top' : ''}`}
+              style={{
+                bottom: `${bottomPct}%`,
+                height: `${heightPct}%`,
+                background: seg.color,
+              }}
             />
           );
         })}
-      </svg>
+      </div>
+      {pouring && topColor && (
+        <div className="bottle__droplet" style={{ background: topColor }} />
+      )}
     </div>
   );
 });
 
 interface Segment {
   color: string;
-  cumulativeStart: number; // 该段底部在瓶中位置（0=底）
+  cumulativeStart: number;
   cumulativeEnd: number;
 }
 
-/** @brief 把 layers 合并为连续同色段（layers 已是同色合并存储，但仍防御性合并） */
+/** @brief 把 layers 合并为连续同色段 */
 function mergeSegments(layers: string[]): Segment[] {
   const segs: Segment[] = [];
   let cursor = 0;
@@ -62,7 +78,11 @@ function mergeSegments(layers: string[]): Segment[] {
   return segs;
 }
 
-function computeTopY(cumulative: number, capacity: number): number {
-  // viewBox 0=瓶顶, 100=瓶底；cumulative=0 → y=100, cumulative=capacity → y=100-capacity占满
-  return 100 - (cumulative / capacity) * 100;
+/** @brief 判断瓶子是否完成（空瓶或满瓶单色） */
+function isCompleted(b: BottleData): boolean {
+  if (b.layers.length === 0) return true;
+  if (b.layers.length !== b.capacity) return false;
+  const first = b.layers[0];
+  if (first === undefined) return false;
+  return b.layers.every(c => c === first);
 }

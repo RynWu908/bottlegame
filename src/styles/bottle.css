@@ -1,52 +1,225 @@
-/* src/styles/bottle.css */
+/* src/styles/bottle.css — 瓶子组件视觉与动画 */
 .bottle {
   position: relative;
   width: var(--bottle-w);
   height: var(--bottle-h);
   border-radius: 28px 28px 24px 24px / 50% 50% 24px 24px;
-  background: rgba(255, 255, 255, .08);
-  border: 1.5px solid rgba(255, 255, 255, .25);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  box-shadow: inset 0 2px 8px rgba(255,255,255,.3),
-              inset 0 -4px 12px rgba(0,0,0,.15),
-              0 4px 16px rgba(0,0,0,.12);
+  box-shadow:
+    inset 0 2px 8px rgba(255, 255, 255, 0.3),
+    inset 0 -4px 12px rgba(0, 0, 0, 0.15),
+    0 4px 16px rgba(68, 50, 102, 0.12);
   overflow: hidden;
   cursor: pointer;
-  transition: transform .2s ease, box-shadow .2s ease;
+  transition: transform 0.2s var(--ease-jelly), box-shadow 0.25s ease;
   touch-action: manipulation;
+  animation: bottleIn 0.45s var(--ease-jelly) both;
 }
+
+/* 瓶子玻璃高光（左侧反射） */
 .bottle::before {
   content: '';
-  position: absolute; top: 8%; left: 12%;
-  width: 18%; height: 60%;
-  background: linear-gradient(to right, rgba(255,255,255,.45), transparent);
+  position: absolute;
+  top: 6%;
+  left: 12%;
+  width: 16%;
+  height: 55%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.1));
   border-radius: 50%;
   filter: blur(2px);
   pointer-events: none;
+  z-index: 2;
 }
+
+/* 瓶口边缘高光 */
+.bottle::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 15%;
+  width: 70%;
+  height: 6%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.4), transparent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* 选中：弹跳上浮 + 光环 */
 .bottle.selected {
-  transform: translateY(-6px);
-  box-shadow: inset 0 2px 8px rgba(255,255,255,.3),
-              inset 0 -4px 12px rgba(0,0,0,.15),
-              0 0 20px rgba(255,255,255,.6),
-              0 8px 24px rgba(0,0,0,.2);
+  animation: bottleBounce 0.4s var(--ease-jelly);
+  transform: translateY(-8px);
+  box-shadow:
+    inset 0 2px 8px rgba(255, 255, 255, 0.35),
+    inset 0 -4px 12px rgba(0, 0, 0, 0.15),
+    0 0 0 3px rgba(255, 143, 177, 0.45),
+    0 0 24px rgba(255, 143, 177, 0.5),
+    0 10px 28px rgba(68, 50, 102, 0.25);
 }
-.bottle.shake { animation: shake .2s; }
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+
+@keyframes bottleBounce {
+  0% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-14px) scale(1.05, 0.95); }
+  50% { transform: translateY(-6px) scale(0.98, 1.02); }
+  100% { transform: translateY(-8px) scale(1); }
 }
+
+/* 抖动（非法操作） */
+.bottle.shake {
+  animation: bottleShake 0.3s ease;
+}
+@keyframes bottleShake {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  15% { transform: translateX(-6px) rotate(-2deg); }
+  30% { transform: translateX(6px) rotate(2deg); }
+  45% { transform: translateX(-5px) rotate(-1.5deg); }
+  60% { transform: translateX(5px) rotate(1.5deg); }
+  75% { transform: translateX(-3px) rotate(-1deg); }
+}
+
+/* =========================================================
+   液体层容器
+   ========================================================= */
 .bottle__liquid {
-  position: absolute; bottom: 0; left: 0; right: 0;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   height: 100%;
   pointer-events: none;
+  overflow: hidden;
+  border-radius: 28px 28px 24px 24px / 50% 50% 24px 24px;
 }
-.bottle__liquid path {
-  transition: height .35s cubic-bezier(.4, 0, .2, 1);
+
+/* 液体段 */
+.bottle__liquid-seg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  transition: height 0.4s var(--ease-flow), bottom 0.4s var(--ease-flow);
+  animation: segIn 0.3s var(--ease-flow);
 }
+
+/* 液体段内部光影（左亮右暗，玻璃质感） */
+.bottle__liquid-seg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.25),
+    transparent 25%,
+    transparent 70%,
+    rgba(0, 0, 0, 0.1)
+  );
+  pointer-events: none;
+}
+
+/* 顶层液体：表面波纹 */
+.bottle__liquid-seg--top::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 5%;
+  right: 5%;
+  height: 4px;
+  background: inherit;
+  border-radius: 50%;
+  filter: blur(1px);
+  animation: surfaceWave 2.2s ease-in-out infinite;
+}
+
+@keyframes segIn {
+  from { transform: scaleY(0); transform-origin: bottom; }
+  to { transform: scaleY(1); }
+}
+
+@keyframes surfaceWave {
+  0%, 100% { transform: scaleX(1) translateY(0); }
+  50% { transform: scaleX(0.93) translateY(-1px); }
+}
+
+/* =========================================================
+   倒水珠：抛物线轨迹
+   ========================================================= */
+.bottle__droplet {
+  position: absolute;
+  top: 0;
+  left: 42%;
+  width: 12%;
+  height: 8%;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  pointer-events: none;
+  z-index: 3;
+  box-shadow: inset -2px -2px 4px rgba(0, 0, 0, 0.15);
+  animation: dropletFall 0.55s var(--ease-flow) forwards;
+}
+@keyframes dropletFall {
+  0% {
+    transform: translate(0, 0) scale(0.4);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.95;
+    transform: translate(-3px, 8%) scale(0.9);
+  }
+  35% {
+    transform: translate(2px, 35%) scale(1);
+  }
+  60% {
+    transform: translate(-2px, 60%) scale(0.85);
+  }
+  85% {
+    transform: translate(1px, 82%) scale(0.6);
+  }
+  100% {
+    transform: translate(0, 95%) scale(0.2);
+    opacity: 0;
+  }
+}
+
+/* =========================================================
+   瓶子入场
+   ========================================================= */
+@keyframes bottleIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 完成态：瓶子脉动 */
+.bottle.completed {
+  animation: bottlePulse 1.4s ease-in-out infinite;
+}
+@keyframes bottlePulse {
+  0%, 100% {
+    box-shadow:
+      inset 0 2px 8px rgba(255, 255, 255, 0.3),
+      0 4px 16px rgba(46, 204, 113, 0.3);
+  }
+  50% {
+    box-shadow:
+      inset 0 2px 8px rgba(255, 255, 255, 0.35),
+      0 4px 28px rgba(46, 204, 113, 0.55);
+  }
+}
+
+/* 减弱动画 */
 @media (prefers-reduced-motion: reduce) {
-  .bottle, .bottle__liquid path { transition: none; }
-  .bottle.shake { animation: none; }
+  .bottle,
+  .bottle__liquid-seg {
+    transition: none;
+    animation: none;
+  }
+  .bottle.selected {
+    transform: translateY(-4px);
+  }
 }
