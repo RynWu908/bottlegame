@@ -1,0 +1,17 @@
+/* src/styles/responsive.css */
+.board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--bottle-w), 1fr));
+  gap: 12px;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px;
+  justify-items: center;
+}
+@media (max-width: 640px) {
+  .board {
+    grid-template-columns: repeat(auto-fit, minmax(var(--bottle-w), 1fr));
+    gap: 8px;
+    padding: 8px;
+  }
+}
