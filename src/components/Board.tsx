@@ -27,6 +27,7 @@ export function Board() {
     }, []);
 
     const cols = computeGridCols(state.bottles.length, winW);
+    const rows = Math.ceil(state.bottles.length / cols);
 
     function handleClick(i: number) {
         const before = useGameStore.getState().state;
@@ -73,7 +74,7 @@ export function Board() {
     }
 
     return (
-        <div className="board" style={{ '--cols': String(cols) } as CSSProperties}>
+        <div className="board" style={{ '--cols': String(cols), '--rows': String(rows) } as CSSProperties}>
             {state.bottles.map((b, i) => (
                 <Bottle
                     key={b.id}
@@ -97,13 +98,13 @@ function computeGridCols(n: number, winW: number): number {
     if (n <= 1) return n;
     // 手机端：≥3 瓶统一 3 列（4 瓶=2×2，5 瓶=3+2，6 瓶=3×2，7 瓶=3+3+1）
     if (winW <= 480) return Math.min(n, 3);
-    // 平板：6 瓶 3 列；7 瓶 4 列；其他按实际瓶数单行
+    // 平板：≤5 瓶单行；6-7 瓶 3-4 列；≥8 瓶 4 列分行
     if (winW <= 768) {
+        if (n <= 5) return n;
         if (n === 6) return 3;
-        if (n === 7) return 4;
-        return n;
+        return 4;
     }
-    // 桌面：≤5 瓶单行；6 瓶 3×2；7 瓶 4+3
+    // 桌面：≤5 瓶单行；6 瓶 3×2；≥7 瓶 4+3
     if (n <= 5) return n;
     if (n === 6) return 3;
     return 4;

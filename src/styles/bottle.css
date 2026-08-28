@@ -143,19 +143,39 @@
 }
 
 /* =========================================================
-   选中：弹跳 + 光环
+   选中：弹跳 + 边框高亮 + 光环 + 顶部指示器
    ========================================================= */
 .bottle.selected {
   animation: bottleBounce 0.4s var(--ease-jelly);
-  transform: translateY(-8px);
-  filter: drop-shadow(0 0 6px rgba(255, 143, 177, 0.55));
+  transform: translateY(-10px) scale(1.04);
+  filter: drop-shadow(0 4px 12px rgba(255, 143, 177, 0.6)) drop-shadow(0 0 8px rgba(255, 143, 177, 0.5));
+  border-color: rgba(255, 143, 177, 0.9);
+  box-shadow:
+    inset 0 0 12px rgba(0, 0, 0, 0.04),
+    inset -1px 0 6px rgba(0, 0, 0, 0.07),
+    inset 0 0 0 2px rgba(255, 143, 177, 0.45),
+    0 0 0 3px rgba(255, 143, 177, 0.35),
+    0 8px 16px rgba(255, 143, 177, 0.25);
+}
+
+/* 选中时瓶口上方的指示箭头 */
+.bottle.selected::before {
+  top: -16px;
+  left: 50%;
+  width: 16px;
+  height: 12px;
+  transform: translateX(-50%);
+  background: linear-gradient(to bottom, rgba(255, 143, 177, 1), rgba(255, 105, 150, 0.9));
+  border-radius: 3px 3px 50% 50%;
+  filter: drop-shadow(0 2px 4px rgba(255, 143, 177, 0.5));
+  z-index: 5;
 }
 
 @keyframes bottleBounce {
   0% { transform: translateY(0) scale(1); }
-  30% { transform: translateY(-14px) scale(1.05, 0.95); }
-  50% { transform: translateY(-6px) scale(0.98, 1.02); }
-  100% { transform: translateY(-8px) scale(1); }
+  30% { transform: translateY(-16px) scale(1.08, 0.94); }
+  50% { transform: translateY(-8px) scale(0.97, 1.03); }
+  100% { transform: translateY(-10px) scale(1.04); }
 }
 
 /* =========================================================
@@ -254,6 +274,6 @@
     animation: none;
   }
   .bottle.selected {
-    transform: translateY(-4px);
+    transform: translateY(-6px) scale(1.03);
   }
 }
