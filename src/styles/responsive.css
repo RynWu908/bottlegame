@@ -18,43 +18,48 @@
   aspect-ratio: 1 / 3;
 }
 
-/* 手机端：根据列数和行数动态限制瓶子尺寸，确保全部可见 */
+/* 手机端：高度优先，宽度由 aspect-ratio 自动计算，瓶子更瘦 */
 @media (max-width: 480px) {
   .board {
-    gap: clamp(10px, 3vw, 16px);
+    --gap: clamp(10px, 3vw, 16px);
+    gap: var(--gap);
     max-width: 96vw;
   }
   .board .bottle {
-    /* 宽度：按列数均分屏幕宽度，扣除 gap 与 padding */
-    max-width: calc((96vw - 24px - (var(--cols) - 1) * 12px) / var(--cols));
-    /* 高度：按行数均分可用视口高度，确保所有行可见 */
-    max-height: calc((72vh - 40px - (var(--rows) - 1) * 12px) / var(--rows));
-    aspect-ratio: 1 / 2.6;
+    /* 瓶子高度 = 可用视口高度 / 行数 */
+    height: calc((70vh - 40px - (var(--rows) - 1) * var(--gap)) / var(--rows));
+    width: auto;
+    max-width: none;
+    aspect-ratio: 1 / 3;
   }
 }
 
 /* 大屏手机/小平板 */
 @media (min-width: 481px) and (max-width: 768px) {
   .board {
-    gap: clamp(10px, 2.5vw, 16px);
+    --gap: clamp(10px, 2.5vw, 16px);
+    gap: var(--gap);
     max-width: 92vw;
   }
   .board .bottle {
-    max-width: min(22vw, 140px);
-    max-height: calc((76vh - 40px - (var(--rows) - 1) * 14px) / var(--rows));
-    aspect-ratio: 1 / 2.8;
+    height: calc((74vh - 40px - (var(--rows) - 1) * var(--gap)) / var(--rows));
+    width: auto;
+    max-width: none;
+    aspect-ratio: 1 / 3;
   }
 }
 
 /* 横屏：高度受限，瓶子更矮更宽 */
 @media (orientation: landscape) and (max-height: 520px) {
   .board {
+    --gap: clamp(6px, 1.5vw, 12px);
     max-width: min(96vw, 900px);
-    gap: clamp(6px, 1.5vw, 12px);
+    gap: var(--gap);
   }
   .board .bottle {
-    max-width: min(18vh, 130px);
-    max-height: calc((80vh - 30px - (var(--rows) - 1) * 10px) / var(--rows));
-    aspect-ratio: 1 / 2.2;
+    height: calc((78vh - 30px - (var(--rows) - 1) * var(--gap)) / var(--rows));
+    width: auto;
+    max-width: none;
+    aspect-ratio: 1 / 2.4;
   }
 }
