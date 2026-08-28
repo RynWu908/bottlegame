@@ -18,7 +18,7 @@
   aspect-ratio: 1 / 3;
 }
 
-/* 手机端：高度优先，宽度由 aspect-ratio 自动计算，瓶子更瘦 */
+/* 手机端：宽高双约束取较小值，确保不溢出不交叉 */
 @media (max-width: 480px) {
   .board {
     --gap: clamp(10px, 3vw, 16px);
@@ -26,9 +26,12 @@
     max-width: 96vw;
   }
   .board .bottle {
-    /* 瓶子高度 = 可用视口高度 / 行数 */
-    height: calc((70vh - 40px - (var(--rows) - 1) * var(--gap)) / var(--rows));
-    width: auto;
+    /* 宽度 = min(屏幕宽度约束, 高度约束/3)，保证宽高都不超限 */
+    width: min(
+      calc((96vw - 24px - (var(--cols) - 1) * var(--gap)) / var(--cols)),
+      calc(((70vh - 40px - (var(--rows) - 1) * var(--gap)) / var(--rows)) / 3)
+    );
+    height: auto;
     max-width: none;
     aspect-ratio: 1 / 3;
   }
@@ -42,8 +45,11 @@
     max-width: 92vw;
   }
   .board .bottle {
-    height: calc((74vh - 40px - (var(--rows) - 1) * var(--gap)) / var(--rows));
-    width: auto;
+    width: min(
+      calc((92vw - 24px - (var(--cols) - 1) * var(--gap)) / var(--cols)),
+      calc(((74vh - 40px - (var(--rows) - 1) * var(--gap)) / var(--rows)) / 3)
+    );
+    height: auto;
     max-width: none;
     aspect-ratio: 1 / 3;
   }
@@ -57,8 +63,11 @@
     gap: var(--gap);
   }
   .board .bottle {
-    height: calc((78vh - 30px - (var(--rows) - 1) * var(--gap)) / var(--rows));
-    width: auto;
+    width: min(
+      calc((96vw - 24px - (var(--cols) - 1) * var(--gap)) / var(--cols)),
+      calc(((78vh - 30px - (var(--rows) - 1) * var(--gap)) / var(--rows)) / 2.4)
+    );
+    height: auto;
     max-width: none;
     aspect-ratio: 1 / 2.4;
   }
